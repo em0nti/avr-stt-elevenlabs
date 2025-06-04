@@ -55,16 +55,18 @@ require('dotenv').config();
           const speaker = word.speaker_id || '0';
 
           if (speaker !== currentSpeaker) {
-            segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
+            segments.push({ speaker: currentSpeaker, text: buffer.join("") });
             currentSpeaker = speaker;
             buffer = [];
           }
           buffer.push(word.text);
         }
         if (buffer.length > 0) {
-          segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
+          segments.push({ speaker: currentSpeaker, text: buffer.join("") });
         }
-        output = segments.map(seg => `[Speaker ${seg.speaker}]\n${seg.text}`).join('\n\n');
+        output = segments
+			.map((seg) => `[${seg.speaker}]\n${seg.text}`)
+			.join("\n\n");
       } else {
         output = transcription.text || '';
       }
