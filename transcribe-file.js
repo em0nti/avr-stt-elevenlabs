@@ -5,8 +5,9 @@ require('dotenv').config();
 
 (async () => {
   const filePath = process.argv[2];
+  const outputPath = process.argv[3];
   if (!filePath) {
-    console.error('Usage: node transcribe-file.js <audio-file-path>');
+    console.error('Usage: node transcribe-file.js <audio-file-path> [output-file]');
     process.exit(1);
   }
 
@@ -21,15 +22,41 @@ require('dotenv').config();
     const modelId = process.env.ELEVENLABS_MODEL_ID || 'scribe_v1';
 
     const transcription = await client.speechToText.convert({
-		file: fs.createReadStream(resolvedPath),
-		model_id: modelId,
-		file_format: "other",
-		language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
-		tag_audio_events: false,
-		diarize: true,
-	});
+                file: fs.createReadStream(resolvedPath),
+                model_id: modelId,
+                file_format: "other",
+                language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
+                tag_audio_events: false,
+                diarize: true,
+        });
 
-    console.log(transcription.text || '');
+    let output = '';
+    if (Array.isArray(transcription.words) && transcription.words.length > 0) {
+      const segments = [];
+      let currentSpeaker = transcription.words[0].speaker_id || '0';
+      let buffer = [];
+      for (const word of transcription.words) {
+        const speaker = word.speaker_id || '0';
+        if (speaker !== currentSpeaker) {
+          segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
+          currentSpeaker = speaker;
+          buffer = [];
+        }
+        buffer.push(word.text);
+      }
+      if (buffer.length > 0) {
+        segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
+      }
+      output = segments.map(seg => `[Speaker ${seg.speaker}]\n${seg.text}`).join('\n\n');
+    } else {
+      output = transcription.text || '';
+    }
+
+    if (outputPath) {
+      fs.writeFileSync(path.resolve(outputPath), output, 'utf8');
+    } else {
+      console.log(output);
+    }
   } catch (err) {
     console.error('Error transcribing file:', err.message || err);
     process.exit(1);
