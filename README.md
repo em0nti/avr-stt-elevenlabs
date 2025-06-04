@@ -110,3 +110,13 @@ The response will be a JSON object containing the transcribed text:
   "transcription": "This is the transcribed text from the audio."
 }
 ```
+
+## Transcribing Local Files
+
+You can also transcribe a local audio file directly from the command line. First ensure your `.env` file contains your ElevenLabs credentials, then run:
+
+```bash
+npm run transcribe -- path/to/audio.wav
+```
+
+Replace `path/to/audio.wav` with the path to your audio file. The transcription text will be printed to the console.
