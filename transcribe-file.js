@@ -23,6 +23,7 @@ require('dotenv').config();
 
     const transcription = await client.speechToText.convert({
       file: fs.createReadStream(resolvedPath),
+
       model_id: modelId,
       file_format: "other",
       language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
@@ -52,6 +53,7 @@ require('dotenv').config();
         let buffer = [];
         for (const word of transcription.words) {
           const speaker = word.speaker_id || '0';
+
           if (speaker !== currentSpeaker) {
             segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
             currentSpeaker = speaker;
