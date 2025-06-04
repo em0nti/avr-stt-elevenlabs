@@ -23,35 +23,37 @@ require('dotenv').config();
 
     const transcription = await client.speechToText.convert({
       file: fs.createReadStream(resolvedPath),
-      modelId: modelId,
-      fileFormat: "other",
-      languageCode: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
-      tagAudioEvents: false,
+
+      model_id: modelId,
+      file_format: "other",
+      language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
+      tag_audio_events: false,
       diarize: true,
-      additionalFormats: [
+      additional_formats: [
         {
           format: "txt",
-          includeSpeakers: true,
+          include_speakers: true,
         },
       ],
     });
 
     let output = '';
 
-    if (Array.isArray(transcription.additionalFormats)) {
-      const txt = transcription.additionalFormats.find(f => f.requestedFormat === 'txt');
+    if (Array.isArray(transcription.additional_formats)) {
+      const txt = transcription.additional_formats.find(f => f.requested_format === 'txt');
       if (txt) {
-        output = txt.isBase64Encoded ? Buffer.from(txt.content, 'base64').toString('utf8') : txt.content;
+        output = txt.is_base64_encoded ? Buffer.from(txt.content, 'base64').toString('utf8') : txt.content;
       }
     }
 
     if (!output) {
       if (Array.isArray(transcription.words) && transcription.words.length > 0) {
         const segments = [];
-        let currentSpeaker = transcription.words[0].speakerId || '0';
+        let currentSpeaker = transcription.words[0].speaker_id || '0';
         let buffer = [];
         for (const word of transcription.words) {
-          const speaker = word.speakerId || '0';
+          const speaker = word.speaker_id || '0';
+
           if (speaker !== currentSpeaker) {
             segments.push({ speaker: currentSpeaker, text: buffer.join(' ') });
             currentSpeaker = speaker;
