@@ -22,20 +22,21 @@ require('dotenv').config();
     const modelId = process.env.ELEVENLABS_MODEL_ID || 'scribe_v1';
 
     const transcription = await client.speechToText.convert({
-      file: fs.createReadStream(resolvedPath),
+		file: fs.createReadStream(resolvedPath),
 
-      model_id: modelId,
-      file_format: "other",
-      language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
-      tag_audio_events: false,
-      diarize: true,
-      additional_formats: [
-        {
-          format: "txt",
-          include_speakers: true,
-        },
-      ],
-    });
+		model_id: modelId,
+		file_format: "other",
+		language_code: process.env.ELEVENLABS_LANGUAGE_CODE || "uk",
+		tag_audio_events: false,
+		diarize: true,
+		additional_formats: [
+			{
+				format: "txt",
+				include_speakers: true,
+				include_timestamps: false,
+			},
+		],
+	});
 
     let output = '';
 
